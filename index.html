@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Node Chat</title>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+	$(function() {
+	  var socket = io.connect('http://localhost:3000')
+		$m = $("#messages");
+	  socket.on('hello', function (data) {
+		add(data);
+	});
+
+	  socket.on('new user', function() {
+		add("New user joined.");
+	  });
+	  socket.on('user left', function() {
+		add("User left.");
+	  });
+	  socket.on('new message', function(data) {
+		add(data.username + ": " + data.message);
+	  });
+	  var message = function(username, message) {
+		socket.emit('send message', {username: username, message: message});
+	  };
+
+		var add = function(msg) {
+			$m.append($("<p>").text(msg));
+			$m[0].scrollTop = $m[0].scrollHeight;
+		};
+
+		$("#chat").submit(function(e) {
+			e.preventDefault();
+			message($("#username").val(), $("#message").val());
+			add("me: " + $("#message").val());
+		});
+	});
+	</script>
+	<style>
+		#messages {
+			border: 1px solid #666;
+			margin-bottom:10px;
+			padding:10px;
+			height:200px;
+			overflow:auto;
+	</style>
+</head>
+<body>
+    <div id="messages">
+	</div>
+	<form id="chat" action="/" method="post">
+		<input id="username" placeholder="Username" />
+		<input id="message" placeholder="Message" />
+		<input type="submit" />
+	</form>
+</body>
+</html>
